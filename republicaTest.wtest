@@ -1,0 +1,52 @@
+import ciudadanos.*
+import poderJudicial.*
+import republica.*
+
+describe "Tests mínimos para SimuNación" {
+
+	const pensador = new Civil(hsDiariasEstudio = 4, hsDiariasPropaganda = 2, usaIAEnExceso = false)
+	const alergico = new Civil(hsDiariasEstudio = 1, hsDiariasPropaganda = 10, usaIAEnExceso = true)
+	const moderado = new Moderado(dietaExtra = 7, nivelDeNetworking = 15)
+	const vanguardista = new Vanguardista(estaPeleadx = false)
+	const proyecto = new ProyectoDeLey(beneficiaAMagnate = true)
+
+	method initialize() {
+		republica.agregarCiviles(#{pensador, alergico})
+		republica.agregarLegisladores(#{moderado, vanguardista})
+	}
+
+	test "El primer civil mencionado prefiere pensar" {
+		assert.that(pensador.prefierePensar())
+	}
+	test "El segundo civil mencionado es alérgico a la sinapsis" {
+		assert.that(alergico.esAlergico())
+	}
+	test "La república sabe decir correctamente la cantidad de alérgicos a la sinapsis entre sus civiles. Usar un ejemplo donde tenga 3 alérgicos" {
+		const alergico2 = new Civil(hsDiariasEstudio = 1, hsDiariasPropaganda = 10, usaIAEnExceso = true)
+		const alergico3 = new Civil(hsDiariasEstudio = 1, hsDiariasPropaganda = 10, usaIAEnExceso = true)
+		republica.agregarCiviles(#{alergico2, alergico3})
+
+		assert.equals(3, republica.cantidadDeCivilesAlergicos())
+	}
+	test "La república indica que existe riesgo de rebelión si hay más civiles que prefieren pensar que alérgicos a la sinapsis en sus filas" {
+		const pensador2 = new Civil(hsDiariasEstudio = 5, hsDiariasPropaganda = 2, usaIAEnExceso = false)
+		republica.agregarCiviles(#{pensador2})
+
+		assert.that(republica.existeRiesgoDeRebelion())
+	}
+	test "El legislador moderado no es inmune a la justicia" {
+		assert.notThat(moderado.esInmune())
+	}
+	test "El mismo legislador vota el proyecto (mencionado arriba) y se vuelve inmune a la justicia" {
+		moderado.votar(proyecto)
+
+		assert.that(moderado.esInmune())
+	}
+	test "Si la república con 1 legislador de cada uno (3 total) lleva al congreso este proyecto, el mismo resulta aprobado" {
+		const reaccionario = new Reaccionario()
+		republica.agregarLegisladores(#{reaccionario})
+		republica.llevarProyectoAlCongreso(proyecto)
+  
+		assert.that(proyecto.fueAprobado())
+	}
+}
